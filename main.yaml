@@ -1,5 +1,5 @@
 - name: ansible roles demo
   hosts: local
   connection: local
-  roles:
-  - demo
+  roles:                 # here ansible will check roles directory if found it will goto to roles directory and continue the execution.
+  - demo     
