@@ -1,5 +1,5 @@
 - name: "configure {{ component }} server"
   hosts: "{{ component }}"
   become: yes
-  roles:
+  roles:                   # here ansible will check roles directory if found it will goto to roles directory and continue the execution.
   - "{{ component }}"
