@@ -5,6 +5,34 @@
 
 - name: nodejs setup
   ansible.builtin.import_role:
-    name: common                    # the name indicates main role which we import that task here it is common is one-more role which app-setup.yaml is defined.                
+    name: common                    # the name indicates main role which we import that task here it is common is one-more role which nodejs-setup.yaml is defined.                
     tasks_from: nodejs-setup.yaml   # this tasks_from indictaes which yaml file need to import the tasks 
-    
+
+- name: systemd setup
+  ansible.builtin.import_role:
+    name: common                    # the name indicates main role which we import that task here it is common is one-more role which systemd-setup.yaml is defined.
+    tasks_from: systemd-setup.yaml  # this tasks_from indictaes which yaml file need to import the tasks
+
+- name: copy mongo repo 
+  ansible.builtin.copy:
+     src: mongo.repo
+     dest: /etc/yum.repos.d/mongo.repo
+
+- name: install mongodb client
+  ansible.builtin.dnf:
+     name: mongodb-mongosh
+     state: present
+
+- name: check products loaded 
+  ansible.builtin.command: mongosh --host "{{ MONGODB_HOST }}" --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+  register: catalogue_output
+
+- name: Load the products
+  ansible.builtin.shell: mongosh --host "{{ MONGODB_HOST }}" </app/db/master-data.js
+  when: catalogue_output.stdout  | int < 0  # here the stdout is string data type the value 0 is integer we need to convert int to string by using int keyword before 0.
+
+- name: start catalogue
+  ansible.builtin.service:
+      name: catalogue
+      state: restarted
+      enabled: yes
