@@ -1,0 +1,84 @@
+# Creating the ec2 instances and route53 records in aws using ansible playbook 
+- name: create ec2 and r53 records
+  hosts: all            # all represents the all hosts 
+  connection: local
+  vars:                 # creating variables security group id, ami id, environment, instance names and domain name.
+   sg_id: sg-0c93cbb50366ae3cd  # my ec2 instance security group id required here
+   ami_id: ami-0220d79f3f480ecf5  # my ec2 instance AMI ID
+   env: dev
+   action: create
+   instances:
+    - mongodb
+    - catalogue
+   domain_name: techno90s.online
+  tasks:              
+  ### create a ec2 instance using the 'amazon.aws.ec2_instance:' module ###
+  - name: Create ec2 instance
+    amazon.aws.ec2_instance:
+     name: "{{ item }}-{{ env }}"  # item will come from loop instances and env replace with variable dev
+     instance_type: "t3.micro"
+     security_group: "{{ sg_id }}"
+     image_id: "{{ ami_id }}"
+     tags: 
+       Project: roboshop
+       Component: "{{ item }}"
+       Environment: "{{ env }}"
+       Name: "{{ item }}-{{ env }}"
+    loop: "{{ instances }}"
+    register: ec2_output   # here all output json format will save into ec2_output variable.
+    when: action == "create"
+                       
+  - name: print the output  # printing the output and saving the output into ec2_output variable.
+    ansible.builtin.debug:
+     msg: "{{ ec2_output }}"  # command to run ansible-playbook -i localhost, roboshop.yaml
+    when: action == "create"
+
+  - name: create route53 records  # creating route 53 records in tasks using ansible playbook
+    amazon.aws.route53:
+     state: present
+     zone: "{{ domain_name }}"
+     record: "{{ item.item }}-{{ env }}.{{ domain_name }}" # item.item will replace mongodb it will come from loop ec2_ouput.results.item.item
+     type: A
+     ttl: 1
+     value: "{{ item.instances[0].private_ip_address }}" # here 1st item will replace ec2_output.result, in that it will search instance[0] o index we will get the private_ip_address record
+     wait: true
+    loop: "{{ ec2_output.results }}"
+    when: action == "create"
+
+  - name: create route53 records for frontend  # creating route 53 records in tasks using ansible playbook
+    amazon.aws.route53:
+     state: present
+     zone: "{{ domain_name }}"
+     record: "roboshop-{{ env }}.{{ domain_name }}" # it will come roboshop-env.techno09s.online
+     type: A
+     ttl: 1
+     value: "{{ item.instances[0].public_ip_address }}" # here 1st item will replace ec2_output.result, in that it will search instance[0] o index we will get the public_ip_address record
+     wait: true
+    loop: "{{ ec2_output.results }}"
+    when:                                 # having multiple conditions using and operator like
+    - item.item == "frontend"
+    - action == "create"
+
+  # ### Destroy the Ec2 instance and Route53 records if not required after usage ###
+  # - name: delete route53 records for frontend
+  #   amazon.aws.route53:
+  #    state: absent
+  #    zone: "{{ domain_name }}"
+  #    record: "roboshop-{{ env }}.{{ domain_name }}" # it will delete roboshop-env.techno09s.online
+  #    type: A
+  #    ttl: 1
+  #   loop: "{{ instances }}"
+  #   when: action == "destroy"
+
+  # - name: delete ec2 instances
+  #   amazon.aws.ec2_instance:
+  #    state: absent
+  #    name: "{{ item }}-{{ env }}"
+  #    wait: false
+  #   loop: "{{ instances }}"
+  #   when: action == "destroy"
+
+
+  # ansible-playbook -i localhost,   -e '{"instances":["mongodb","catalogue","redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}'  -e action=destroy roboshop.yaml
+
+  # ansible-playbook -i localhost,   -e '{"instances":["redis","user","cart"]}' roboshop.yaml  to create redis, user, cart instance along with dns records.
