@@ -38,11 +38,11 @@
     name: mysql 
     state: present
 
-- name: install dependencie
+- name: install dependencies
   ansible.builtin.pip:
     name: "{{ item }}"        # here python module PyMySQL library is required to connect mysql client to load shipping data or schema
     executable: pip3.9        # here cryptography package is required to connect mysql client to connect with sha2_password authentication.
-    loop:                     
+  loop:                     
     - cryptography
     - PyMySQL
 
@@ -54,7 +54,7 @@
     login_user: root
     login_password: RoboShop@1
     target: "{{ item }}"
-    loop:
+  loop:
     - /app/db/schema.sql
     - /app/db/app-user.sql 
     - /app/db/master-data.sql
