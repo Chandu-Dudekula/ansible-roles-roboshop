@@ -18,3 +18,6 @@
       name: user
       state: restarted
       enabled: yes
+
+
+# ansible-playbook -e component=user roboshop.yaml

@@ -23,3 +23,5 @@
      name: redis    
      enabled: yes
      state: restarted
+
+# ansible-playbook -e component=redis roboshop.yaml
