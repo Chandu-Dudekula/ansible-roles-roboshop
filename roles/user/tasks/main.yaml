@@ -1,0 +1,20 @@
+- name: app setup
+  ansible.builtin.import_role:
+    name: common                    # the name indicates main role which we import that task here it is common is one-more role which app-setup.yaml is defined.
+    tasks_from: app-setup.yaml      # this tasks_from indictaes which yaml file need to import the tasks 
+
+- name: nodejs setup
+  ansible.builtin.import_role:
+    name: common                    # the name indicates main role which we import that task here it is common is one-more role which nodejs-setup.yaml is defined.                
+    tasks_from: nodejs-setup.yaml   # this tasks_from indictaes which yaml file need to import the tasks 
+
+- name: systemd setup
+  ansible.builtin.import_role:
+    name: common                    # the name indicates main role which we import that task here it is common is one-more role which systemd-setup.yaml is defined.
+    tasks_from: systemd-setup.yaml  # this tasks_from indictaes which yaml file need to import the tasks
+
+- name: start user
+  ansible.builtin.service:
+      name: user
+      state: restarted
+      enabled: yes
