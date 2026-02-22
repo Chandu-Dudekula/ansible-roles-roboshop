@@ -3,21 +3,11 @@
     name: common                    # the name indicates main role which we import that task here it is common is one-more role which app-setup.yaml is defined.
     tasks_from: app-setup.yaml      # this tasks_from indictaes which yaml file need to import the tasks 
 
-- name: install maven
-  ansible.builtin.dnf:
-     name: maven 
-     state: present
-
-- name: install dependencies
-  ansible.builtin.command: mvn clean package
-  args:                   # here the args telling to asnisble run the command after Change the directory to /app and run mvn clean pacakge
-    chdir: /app
-
-- name: install dependencies
-  ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar 
-  args:               # here the args telling to asnisble run the command after Change the directory to /app and run mv target/shipping-1.0.jar shipping.jar 
-    chdir: /app
-
+- name: java setup
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: java-setup.yaml
+ 
 - name: systemd setup
   ansible.builtin.import_role:
    name: common                    # the name indicates main role which we import that task here it is common is one-more role which systemd-setup.yaml is defined.
@@ -27,16 +17,10 @@
   ansible.builtin.systemd_service:
     daemon_reload: true
 
-- name: start shipping
-  ansible.builtin.service:
-    name: shipping
-    state: restarted
-    enabled: yes
-
-- name: install mysql
-  ansible.builtin.dnf:
-    name: mysql 
-    state: present
+# - name: install mysql
+#   ansible.builtin.dnf:
+#     name: mysql 
+#     state: present    # this mysql installation is already looped in java-setup.yaml in common roles.
 
 - name: install dependencies
   ansible.builtin.pip:

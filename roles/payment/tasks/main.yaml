@@ -1,0 +1,24 @@
+- name: app setup
+  ansible.builtin.import_role:
+   name: common                    # the name indicates main role which we import that task here it is common is one-more role which app-setup.yaml is defined.
+   tasks_from: app-setup.yaml      # this tasks_from indictaes which yaml file need to import the tasks 
+
+- name: python setup
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: python-setup.yaml
+  
+- name: systemd setup
+  ansible.builtin.import_role:
+   name: common
+   tasks_from: systemd-setup.yaml
+
+- name: daemon reload 
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: start enable payment
+  ansible.builtin.service:
+    name: payment
+    state: restarted
+    enabled: yes
