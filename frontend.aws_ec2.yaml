@@ -2,4 +2,15 @@ plugin: amazon.aws.aws_ec2
 regions:
 - us-east-1
 hostnames:
-- ip-address
+#- ip-address
+- private-ip-address
+
+
+
+
+
+
+
+
+
+# ansible-inventory -i frontend.aws_ec2_yaml to run this dynamic inventory file.
