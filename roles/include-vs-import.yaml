@@ -2,7 +2,7 @@
   hosts: local
   connection: local
   roles: 
-  - include-import
+  - include-import   # here include-import role will call while executing the playbook
 
 
 
