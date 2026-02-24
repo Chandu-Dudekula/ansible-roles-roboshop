@@ -1,9 +1,9 @@
-- name: call common role
-  ansible.builtin.import_role:
-    name: common
-    tasks_from: include-vs-import.yaml   # here include-vs-import role is importing from common tasks in main roles section 
-
 # - name: call common role
-#   ansible.builtin.include_role:
+#   ansible.builtin.import_role:
 #     name: common
-#     tasks_from: include-vs-import.yaml 
+#     tasks_from: include-vs-import.yaml   # here include-vs-import role is importing from common tasks in main roles section 
+
+- name: call common role
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: include-vs-import.yaml     # here include-vs-import role is including from common tasks in main roles section 
