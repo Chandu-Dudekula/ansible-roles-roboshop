@@ -1,0 +1,10 @@
+- name: include vs import 
+  hosts: local
+  connection: local
+  roles: 
+  - include-import   # here include-import role will call while executing the playbooks
+
+
+
+  #  import_roles parse the playbook before execution, it is static. But include_roles is dynamic it will directly execute the playbook, it won't parse the like import_role before execution.
+
